@@ -73,7 +73,7 @@ typedef struct {
     uint16_t content_offset;
 } nanofs_file_info_t;
 
-typedef enum {
+typedef enum nanofs_ret {
     NANOFS_NO_ERROR = 0,
     NANOFS_WRONG_VERSION = -1,
     NANOFS_UNCAUGHT_OOR = -2,
@@ -87,7 +87,7 @@ typedef enum {
     NANOFS_INIT_INVALID = -10,
     NANOFS_INIT_HEADER_INSUFFICIENT = -11,
     NANOFS_NOT_READY = -12,
-} nanofs_ret;
+};
 
 nanofs_ret nanofs_stat(const char *filename, nanofs_file_info_t *file_info);
 

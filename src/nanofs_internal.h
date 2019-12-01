@@ -11,7 +11,7 @@ typedef enum {
     NANOFS_FILE_STATUS_DELETED = 0x00,
 } nanofs_file_status;
 
-typedef struct {
+typedef struct nanofs_file_inner_info_t {
     char filename[64];
     uint8_t filename_len;
     uint16_t file_len;
@@ -19,9 +19,9 @@ typedef struct {
     uint8_t creator_len;
     uint64_t created;
     uint16_t optimes;
-} nanofs_file_inner_info_t;
+};
 
-typedef struct {
+typedef struct nanofs_t {
     int offset;
     uint16_t page_size;
     uint8_t page_count;
@@ -29,4 +29,4 @@ typedef struct {
     uint8_t overwrite;
     uint8_t erase_before_write;
     void *device;
-} nanofs_t;
+};

@@ -11,7 +11,7 @@
 
 nanofs_t nanofs = {0, 0, 0, 0, 0, 0, 0, NULL};
 
-enum {
+typedef enum nanofs_addr_type {
     NANOFS_PAGE_STATUS_ADDR = 0,
     NANOFS_FILENAME_OFFSET_ADDR = 5,
 //    NANOFS_FILENAME_LEN_ADDR = 1,
@@ -21,7 +21,7 @@ enum {
     NANOFS_STAT_TIMES_ADDR = 6,
     NANOFS_WRITE_TIMES_ADDR = 7,
     NANOFS_READ_TIMES_ADDR = 8,
-} nanofs_addr_type;
+};
 
 void nanofs_len_func_hel(uint8_t *data, int arr_len, int len) {
     int index;
