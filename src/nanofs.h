@@ -67,35 +67,40 @@ typedef struct {
     uint8_t creator_len;
     uint64_t created;
     uint16_t optimes;
+
+    //TODO move to inner
+    uint8_t page_index;
+    uint16_t content_offset;
 } nanofs_file_info_t;
 
 typedef enum {
     NANOFS_NO_ERROR = 0,
-    NANOFS_WRONG_VERSION = 1,
-    NANOFS_UNCAUGHT_OOR = 2,
-    NANOFS_NOT_FOUND = 3,
-    NANOFS_INSUFFICIENT_SPACE = 4,
-    NANOFS_UNFORMATTED = 5,
-    NANOFS_BUFFER_WRONG_SIZE = 6,
-    NANOFS_FILE_ALREADY_EXISTS = 7,
-    NANOFS_UNDEFINED_ERROR = 8,
-    NANOFS_INITED = 9,
-    NANOFS_INIT_INVALID = 10,
-    NANOFS_INIT_HEADER_INSUFFICIENT = 11,
-    NANOFS_NOT_READY = 12,
+    NANOFS_WRONG_VERSION = -1,
+    NANOFS_UNCAUGHT_OOR = -2,
+    NANOFS_NOT_FOUND = -3,
+    NANOFS_INSUFFICIENT_SPACE = -4,
+    NANOFS_UNFORMATTED = -5,
+    NANOFS_BUFFER_WRONG_SIZE = -6,
+    NANOFS_FILE_ALREADY_EXISTS = -7,
+    NANOFS_UNDEFINED_ERROR = -8,
+    NANOFS_INITED = -9,
+    NANOFS_INIT_INVALID = -10,
+    NANOFS_INIT_HEADER_INSUFFICIENT = -11,
+    NANOFS_NOT_READY = -12,
 } nanofs_ret;
 
 nanofs_ret nanofs_stat(const char *filename, nanofs_file_info_t *file_info);
 
-nanofs_ret nanofs_read(const char *filename, uint8_t *buf);
+int nanofs_read(const char *filename, uint8_t *buf);
 
-nanofs_ret nanofs_read_by_info(nanofs_file_info_t *nanofs_file_info, uint8_t *buf);
+int nanofs_read_by_info(nanofs_file_info_t *nanofs_file_info, uint8_t *buf);
 
-nanofs_ret nanofs_write(const char *filename, uint8_t *buf);
+int nanofs_write(const char *filename, uint8_t *buf, uint16_t len);
 
-nanofs_ret nanofs_delete(const char *filename);
+int nanofs_delete(const char *filename);
 
-nanofs_ret nanofs_init(void *device, int offset, uint16_t page_size, uint8_t page_count, uint8_t overwrite);
+nanofs_ret nanofs_init(void *device, int offset, uint16_t page_size, uint8_t page_count, uint8_t overwrite,
+                       uint8_t erase_before_write);
 
 #ifdef __cplusplus
 }

@@ -12,10 +12,21 @@ typedef enum {
 } nanofs_file_status;
 
 typedef struct {
+    char filename[64];
+    uint8_t filename_len;
+    uint16_t file_len;
+    char creator[64];
+    uint8_t creator_len;
+    uint64_t created;
+    uint16_t optimes;
+} nanofs_file_inner_info_t;
+
+typedef struct {
     int offset;
     uint16_t page_size;
     uint8_t page_count;
     uint8_t status; // 1 for ready,0 for not ready
     uint8_t overwrite;
+    uint8_t erase_before_write;
     void *device;
 } nanofs_t;

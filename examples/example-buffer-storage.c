@@ -7,7 +7,7 @@ void buffer_storage_init() {
 }
 
 int nanofs_native_read_bytes(void *device, uint32_t address, uint16_t size, uint8_t *output) {
-    printf("nanofs_native_read_bytes\n");
+//    printf("nanofs_native_read_bytes\n");
     int index;
     for (index = 0; index < size; index++) {
         output[index] = storage[index + address];
@@ -16,11 +16,19 @@ int nanofs_native_read_bytes(void *device, uint32_t address, uint16_t size, uint
 }
 
 int nanofs_native_write_bytes(void *device, uint32_t address, uint16_t size, const uint8_t *input) {
-    printf("nanofs_native_write_bytes\n");
+//    printf("nanofs_native_write_bytes\n");
+    int index;
+    for (index = 0; index < size; index++) {
+        storage[index + address] = input[index];
+    }
     return 0;
 }
 
 int nanofs_native_erase(void *device, uint32_t address, uint16_t size) {
-    printf("nanofs_native_erase\n");
+//    printf("nanofs_native_erase\n");
+    int index;
+    for (index = 0; index < size; index++) {
+        storage[index + address] = 0xFF;
+    }
     return 0;
 }
