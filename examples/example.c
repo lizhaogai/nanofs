@@ -21,18 +21,18 @@ int main() {
     const uint8_t *filename;
     filename = "woshihaode";;
     int ret = nanofs_stat(filename, &fileInfo);
-    printf("nanofs stat result :%d.\n", ret);
-    if (ret == 0) {
-        printf("nanofs stat filename :%s.\n", fileInfo.filename);
-        printf("nanofs stat file_len :%d.\n", fileInfo.file_len);
-        printf("nanofs content offset :%d.\n", fileInfo.content_offset);
-        printf("nanofs stat filename_len :%d.\n", fileInfo.filename_len);
-    }
 
     uint8_t rd[300];
     nanofs_read(filename, rd);
     printf("nanofs value rd :%s.\n", (const char *)rd);
 
+    printf("nanofs stat result :%d.\n", ret);
+    if (ret == 0) {
+        printf("nanofs stat filename :%s.\n", fileInfo.filename);
+        printf("nanofs stat content_len :%d.\n", fileInfo.content_len);
+        printf("nanofs content offset :%d.\n", fileInfo.content_offset);
+        printf("nanofs stat filename_len :%d.\n", fileInfo.filename_len);
+    }
 
     uint8_t dd[600] = "222222222";
     ret = nanofs_write("woshihaode", dd, strlen(dd));
@@ -40,7 +40,7 @@ int main() {
     printf("nanofs stat after update result :%d.\n", ret);
     if (ret == 0) {
         printf("nanofs stat filename :%s.\n", fileInfo.filename);
-        printf("nanofs stat file_len :%d.\n", fileInfo.file_len);
+        printf("nanofs stat content_len :%d.\n", fileInfo.content_len);
         printf("nanofs content offset :%d.\n", fileInfo.content_offset);
         printf("nanofs stat filename_len :%d.\n", fileInfo.filename_len);
 
@@ -48,14 +48,14 @@ int main() {
 
     uint8_t rdd[9];
     nanofs_read(filename, rdd);
-    printf("nanofs value rdd :%s.\n", (const char *)rdd);
+    printf("nanofs value rdd :%s.\n", rdd);
 
     ret = nanofs_delete(filename);
     ret = nanofs_stat(filename, &fileInfo);
     printf("nanofs stat after delete result :%d.\n", ret);
     if (ret == 0) {
         printf("nanofs stat filename :%s.\n", fileInfo.filename);
-        printf("nanofs stat file_len :%d.\n", fileInfo.file_len);
+        printf("nanofs stat content_len :%d.\n", fileInfo.content_len);
         printf("nanofs content offset :%d.\n", fileInfo.content_offset);
         printf("nanofs stat filename_len :%d.\n", fileInfo.filename_len);
     }

@@ -62,7 +62,7 @@ extern int nanofs_native_erase(void *device, uint32_t address, uint16_t size);
 typedef struct {
     char filename[64];
     uint8_t filename_len;
-    uint16_t file_len;
+    uint16_t content_len;
     char creator[64];
     uint8_t creator_len;
     uint64_t created;
@@ -71,7 +71,6 @@ typedef struct {
     //TODO move to inner
     uint8_t page_index;
     uint16_t content_offset;
-    uint16_t content_len;
 } nanofs_file_info_t;
 
 typedef enum {

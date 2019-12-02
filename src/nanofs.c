@@ -117,10 +117,10 @@ nanofs_ret nanofs_stat(const char *filename, nanofs_file_info_t *file_info) {
             int cmp_ret = strncmp(filename, name, cn);
             if (!cmp_ret) {
 
-                uint8_t file_len[NANOFS_CONTENT_LEN_SIZE];
+                uint8_t content_len[NANOFS_CONTENT_LEN_SIZE];
                 cn = nanofs_native_read_bytes(nanofs.device, nanofs.offset + nanofs.page_size * i +
                                                              nanofs_get_addr(NANOFS_CONTENT_LEN_ADDR),
-                                              NANOFS_CONTENT_LEN_SIZE, file_len);
+                                              NANOFS_CONTENT_LEN_SIZE, content_len);
                 if (cn < NANOFS_CONTENT_LEN_SIZE) {
                     return NANOFS_UNDEFINED_ERROR;
                 }
@@ -134,7 +134,7 @@ nanofs_ret nanofs_stat(const char *filename, nanofs_file_info_t *file_info) {
                 }
 
                 file_info->page_index = i;
-                file_info->file_len = nanofs_len_func_hrev(file_len, NANOFS_CONTENT_LEN_SIZE);
+                file_info->content_len = nanofs_len_func_hrev(content_len, NANOFS_CONTENT_LEN_SIZE);
                 file_info->content_offset = nanofs_len_func_hrev(content_offset, NANOFS_CONTENT_OFFSET_SIZE);
                 strcpy(file_info->filename, filename);
                 file_info->filename_len = strlen(filename);
@@ -161,7 +161,7 @@ int nanofs_read(const char *filename, uint8_t *buf) {
 
 int nanofs_read_by_info(nanofs_file_info_t *file_info, uint8_t *buf) {
     return nanofs_native_read_bytes(nanofs.device, nanofs.offset + nanofs.page_size * file_info->page_index +
-                                                   file_info->content_offset, file_info->file_len, buf);
+                                                   file_info->content_offset, file_info->content_len, buf);
 }
 
 int nanofs_do_write(uint8_t index, uint8_t *filename, uint8_t *buf, uint16_t len) {
@@ -235,10 +235,10 @@ int nanofs_write(const char *filename, uint8_t *buf, uint16_t len) {
             }
 
         }
+        return NANOFS_INSUFFICIENT_SPACE;
     } else {
         return ret;
     }
-    return NANOFS_UNDEFINED_ERROR;
 }
 
 int nanofs_delete(const char *filename) {

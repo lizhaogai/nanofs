@@ -14,7 +14,7 @@ typedef enum {
 typedef struct {
     char filename[64];
     uint8_t filename_len;
-    uint16_t file_len;
+    uint16_t content_len;
     char creator[64];
     uint8_t creator_len;
     uint64_t created;
