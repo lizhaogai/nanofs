@@ -3,6 +3,8 @@ project(nanofs C)
 
 set(CMAKE_C_STANDARD 99)
 
+set(TARGET_NANO_FS_GROUP test CACHE STRING "Group to build")
+
 if (ZEPHYR_BASE)
     include(CMakeListsZephyr.txt)
 else ()
@@ -10,5 +12,8 @@ else ()
             src/nanofs.c
             )
     target_include_directories(nanofs PUBLIC include)
-    add_subdirectory(examples)
+    if (TARGET_NANO_FS_GROUP STREQUAL test)
+        add_subdirectory(testlib)
+        add_subdirectory(examples)
+    endif ()
 endif ()
