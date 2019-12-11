@@ -9,7 +9,7 @@ typedef enum {
     NANOFS_FILE_STATUS_OK = 0xF8,
     NANOFS_FILE_STATUS_ERROR = 0xF0,
     NANOFS_FILE_STATUS_DELETED = 0x00,
-} nanofs_file_status;
+} nano_fs_file_status;
 
 typedef struct {
     char filename[64];
@@ -19,7 +19,7 @@ typedef struct {
     uint8_t creator_len;
     uint64_t created;
     uint16_t optimes;
-} nanofs_file_inner_info_t;
+} nano_fs_file_inner_info_t;
 
 typedef struct {
     int offset;
@@ -29,6 +29,6 @@ typedef struct {
     uint8_t overwrite;
     uint8_t erase_before_write;
     void *device;
-} nanofs_t;
+} nano_fs_t;
 
-nano_fs_ret nanofs_do_stat(const uint8_t *filename, uint16_t filename_len, nano_fs_file_info_t *file_info);
+nano_fs_ret nano_fs_do_stat(const uint8_t *filename, uint16_t filename_len, nano_fs_file_info_t *file_info);
