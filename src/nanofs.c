@@ -9,7 +9,7 @@
 // 3。stat read write 的optimes次数存储空间已经预留，暂时没有实现
 // 4。文件删除目前直接擦除
 
-nano_fs_t nano_fs = {0, 0, 0, 0, 0, 0, 0, NULL};
+nano_fs_t nano_fs = {0, 0, 0, 0, 1, 0, NULL};
 
 enum {
     NANO_FS_PAGE_STATUS_ADDR = 0,
@@ -30,7 +30,7 @@ void nano_fs_len_func_hel(uint8_t *data, int arr_len, int len) {
     }
 }
 
-int nano_fs_len_func_hrev(uint8_t *data, int arr_len) {
+int nano_fs_len_func_hre(uint8_t *data, int arr_len) {
     int len = 0;
     int index;
     for (index = arr_len; index > 0; index--) {
@@ -40,7 +40,7 @@ int nano_fs_len_func_hrev(uint8_t *data, int arr_len) {
 }
 
 
-int nanofs_get_addr(uint8_t addr_type) {
+int nano_fs_get_addr(uint8_t addr_type) {
     if (nano_fs.status == 0) {
         return NANO_FS_NOT_READY;
     }
@@ -71,6 +71,7 @@ int nanofs_get_addr(uint8_t addr_type) {
     if (addr_type == NANO_FS_READ_TIMES_ADDR) {
         return NANO_FS_CONTENT_OFFSET - NANO_FS_STAT_TIMES_MAX - NANO_FS_READ_TIMES_MAX;
     }
+    return -1;
 }
 
 int nano_fs_page_has_data(int status) {
@@ -79,7 +80,7 @@ int nano_fs_page_has_data(int status) {
 }
 
 nano_fs_ret
-_nano_fs_do_stat(const uint8_t *filename, uint16_t filename_len, nano_fs_file_info_t *file_info, uint8_t additional) {
+_nano_fs_do_stat(const uint8_t *filename, uint16_t filename_len, nano_fs_file_info_t *file_info, uint8_t detail) {
     if (nano_fs.status == 0) {
         return NANO_FS_NOT_READY;
     }
@@ -88,21 +89,21 @@ _nano_fs_do_stat(const uint8_t *filename, uint16_t filename_len, nano_fs_file_in
     uint8_t page_status[NANO_FS_PAGE_STATUS_SIZE];
     uint8_t fnl[NANO_FS_FILENAME_LEN_SIZE];
     uint8_t name[NANO_FS_FILENAME_SIZE];
-    uint8_t creater[NANO_FS_CREATOR_SIZE];
-    uint8_t created[NANO_FS_CREATED_SIZE];
+//    uint8_t creater[NANO_FS_CREATOR_SIZE];
+//    uint8_t created[NANO_FS_CREATED_SIZE];
     int cn;
     for (i = 0; i < nano_fs.page_count; i++) {
         cn = nano_fs_native_read_bytes(nano_fs.device, nano_fs.offset + nano_fs.page_size * i +
-                                                       nanofs_get_addr(NANO_FS_PAGE_STATUS_ADDR),
+                                                       nano_fs_get_addr(NANO_FS_PAGE_STATUS_ADDR),
                                        NANO_FS_PAGE_STATUS_SIZE, page_status);
         if (cn < NANO_FS_PAGE_STATUS_SIZE) {
             return NANO_FS_UNDEFINED_ERROR;
         }
         if (nano_fs_page_has_data(page_status[0])) {
             cn = nano_fs_native_read_bytes(nano_fs.device, nano_fs.offset + nano_fs.page_size * i +
-                                                           nanofs_get_addr(NANO_FS_FILENAME_OFFSET_ADDR),
+                                                           nano_fs_get_addr(NANO_FS_FILENAME_OFFSET_ADDR),
                                            NANO_FS_FILENAME_LEN_SIZE, fnl);
-            uint16_t _filename_len = nano_fs_len_func_hrev(fnl, NANO_FS_FILENAME_LEN_SIZE);
+            uint16_t _filename_len = nano_fs_len_func_hre(fnl, NANO_FS_FILENAME_LEN_SIZE);
             if (cn < NANO_FS_FILENAME_LEN_SIZE) {
                 return NANO_FS_UNDEFINED_ERROR;
             }
@@ -110,7 +111,7 @@ _nano_fs_do_stat(const uint8_t *filename, uint16_t filename_len, nano_fs_file_in
                 continue;
             }
             cn = nano_fs_native_read_bytes(nano_fs.device, nano_fs.offset + nano_fs.page_size * i +
-                                                           nanofs_get_addr(NANO_FS_FILENAME_OFFSET_ADDR) +
+                                                           nano_fs_get_addr(NANO_FS_FILENAME_OFFSET_ADDR) +
                                                            NANO_FS_FILENAME_LEN_SIZE,
                                            _filename_len, name);
             if (cn < _filename_len) {
@@ -120,14 +121,14 @@ _nano_fs_do_stat(const uint8_t *filename, uint16_t filename_len, nano_fs_file_in
 
                 uint8_t content_len[NANO_FS_CONTENT_LEN_SIZE];
                 cn = nano_fs_native_read_bytes(nano_fs.device, nano_fs.offset + nano_fs.page_size * i +
-                                                               nanofs_get_addr(NANO_FS_CONTENT_LEN_ADDR),
+                                                               nano_fs_get_addr(NANO_FS_CONTENT_LEN_ADDR),
                                                NANO_FS_CONTENT_LEN_SIZE, content_len);
                 if (cn < NANO_FS_CONTENT_LEN_SIZE) {
                     return NANO_FS_UNDEFINED_ERROR;
                 }
                 uint8_t content_offset[NANO_FS_CONTENT_OFFSET_SIZE];
                 cn = nano_fs_native_read_bytes(nano_fs.device, nano_fs.offset + nano_fs.page_size * i +
-                                                               nanofs_get_addr(NANO_FS_CONTENT_LEN_OFFSET_ADDR),
+                                                               nano_fs_get_addr(NANO_FS_CONTENT_LEN_OFFSET_ADDR),
                                                NANO_FS_CONTENT_OFFSET_SIZE, content_offset);
 
                 if (cn < NANO_FS_CONTENT_LEN_SIZE) {
@@ -135,9 +136,9 @@ _nano_fs_do_stat(const uint8_t *filename, uint16_t filename_len, nano_fs_file_in
                 }
 
                 file_info->page_index = i;
-                file_info->content_len = nano_fs_len_func_hrev(content_len, NANO_FS_CONTENT_LEN_SIZE);
-                file_info->content_offset = nano_fs_len_func_hrev(content_offset, NANO_FS_CONTENT_OFFSET_SIZE);
-                strcpy(file_info->filename, filename);
+                file_info->content_len = nano_fs_len_func_hre(content_len, NANO_FS_CONTENT_LEN_SIZE);
+                file_info->content_offset = nano_fs_len_func_hre(content_offset, NANO_FS_CONTENT_OFFSET_SIZE);
+                strcpy((char *) file_info->filename, (char *) filename);
                 file_info->filename_len = filename_len;
                 return NANO_FS_NO_ERROR;
             }
@@ -154,6 +155,9 @@ nano_fs_ret nano_fs_do_stat(const uint8_t *filename, uint16_t filename_len, nano
 
 nano_fs_ret nano_fs_stat(const uint8_t *filename, uint16_t filename_len, nano_fs_file_info_t *file_info) {
     nano_fs_ret ret = _nano_fs_do_stat(filename, filename_len, file_info, 1);
+    if (ret == NANO_FS_NO_ERROR) {
+
+    }
     return ret;
 }
 
@@ -180,33 +184,33 @@ int nanofs_do_write(uint8_t index, const uint8_t *filename, uint16_t filename_l,
     nano_fs_native_erase(nano_fs.device, nano_fs.offset + nano_fs.page_size * index, nano_fs.page_size);
     data[0] = NANOFS_FILE_STATUS_WRITING;
     nano_fs_native_write_bytes(nano_fs.device, nano_fs.offset + nano_fs.page_size * index +
-                                               nanofs_get_addr(NANO_FS_PAGE_STATUS_ADDR),
+                                               nano_fs_get_addr(NANO_FS_PAGE_STATUS_ADDR),
                                NANO_FS_PAGE_STATUS_SIZE, data);
 
     uint8_t content_offset[NANO_FS_CONTENT_OFFSET_SIZE];
     nano_fs_len_func_hel(content_offset, NANO_FS_CONTENT_OFFSET_SIZE, NANO_FS_CONTENT_OFFSET);
     nano_fs_native_write_bytes(nano_fs.device,
                                nano_fs.offset + nano_fs.page_size * index +
-                               nanofs_get_addr(NANO_FS_CONTENT_LEN_OFFSET_ADDR),
+                               nano_fs_get_addr(NANO_FS_CONTENT_LEN_OFFSET_ADDR),
                                NANO_FS_CONTENT_OFFSET_SIZE, content_offset);
 
     uint8_t content_len[NANO_FS_CONTENT_LEN_SIZE];
     nano_fs_len_func_hel(content_len, NANO_FS_CONTENT_LEN_SIZE, len);
     nano_fs_native_write_bytes(nano_fs.device,
                                nano_fs.offset + nano_fs.page_size * index +
-                               nanofs_get_addr(NANO_FS_CONTENT_LEN_ADDR),
+                               nano_fs_get_addr(NANO_FS_CONTENT_LEN_ADDR),
                                NANO_FS_CONTENT_LEN_SIZE, content_len);
 
     uint8_t filename_len[NANO_FS_FILENAME_LEN_SIZE];
     nano_fs_len_func_hel(filename_len, NANO_FS_FILENAME_LEN_SIZE, filename_l);
     nano_fs_native_write_bytes(nano_fs.device,
                                nano_fs.offset + nano_fs.page_size * index +
-                               nanofs_get_addr(NANO_FS_FILENAME_OFFSET_ADDR),
+                               nano_fs_get_addr(NANO_FS_FILENAME_OFFSET_ADDR),
                                NANO_FS_FILENAME_LEN_SIZE, filename_len);
 
     nano_fs_native_write_bytes(nano_fs.device,
                                nano_fs.offset + nano_fs.page_size * index +
-                               nanofs_get_addr(NANO_FS_FILENAME_OFFSET_ADDR) + NANO_FS_FILENAME_LEN_SIZE,
+                               nano_fs_get_addr(NANO_FS_FILENAME_OFFSET_ADDR) + NANO_FS_FILENAME_LEN_SIZE,
                                filename_l, filename);
 
     nano_fs_native_write_bytes(nano_fs.device,
@@ -215,7 +219,7 @@ int nanofs_do_write(uint8_t index, const uint8_t *filename, uint16_t filename_l,
 
     data[0] = NANOFS_FILE_STATUS_OK;
     nano_fs_native_write_bytes(nano_fs.device, nano_fs.offset + nano_fs.page_size * index +
-                                               nanofs_get_addr(NANO_FS_PAGE_STATUS_ADDR),
+                                               nano_fs_get_addr(NANO_FS_PAGE_STATUS_ADDR),
                                NANO_FS_PAGE_STATUS_SIZE, data);
     return len;
 }
@@ -235,7 +239,7 @@ int nano_fs_write(const uint8_t *filename, uint16_t filename_len, uint8_t *buf, 
         for (index = 0; index < nano_fs.page_count; index++) {
             int cn;
             cn = nano_fs_native_read_bytes(nano_fs.device, nano_fs.offset + nano_fs.page_size * index +
-                                                           nanofs_get_addr(NANO_FS_PAGE_STATUS_ADDR),
+                                                           nano_fs_get_addr(NANO_FS_PAGE_STATUS_ADDR),
                                            NANO_FS_PAGE_STATUS_SIZE, data);
             if (cn < NANO_FS_PAGE_STATUS_SIZE) {
                 return NANO_FS_UNDEFINED_ERROR;
@@ -275,7 +279,7 @@ int nano_fs_array_cmp(const uint8_t *arr1, const uint8_t *arr2, uint16_t size) {
     return 0;
 }
 
-nano_fs_ret nano_fs_init(void *device, int offset, uint16_t page_size, uint8_t page_count, uint8_t overwrite,
+nano_fs_ret nano_fs_init(void *device, int offset, uint16_t page_size, uint8_t page_count,
                          uint8_t erase_before_write) {
     if (nano_fs.status == 1) {
         return NANO_FS_INITED;
@@ -298,6 +302,6 @@ nano_fs_ret nano_fs_init(void *device, int offset, uint16_t page_size, uint8_t p
     nano_fs.page_count = page_count;
     nano_fs.status = 1;
     nano_fs.erase_before_write = erase_before_write;
-    nano_fs.overwrite = overwrite;
+//    nano_fs.overwrite = overwrite;
     return NANO_FS_NO_ERROR;
 }
