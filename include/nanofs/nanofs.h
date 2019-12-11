@@ -106,6 +106,8 @@ int nano_fs_delete(const uint8_t *filename, uint16_t filename_len);
 nano_fs_ret nano_fs_init(void *device, int offset, uint16_t page_size, uint8_t page_count,
                          uint8_t force_erase_before_write);
 
+nano_fs_ret nano_fs_destroy();
+
 int nano_fs_array_cmp(const uint8_t *arr1, const uint8_t *arr2, uint16_t size);
 
 #ifdef __cplusplus
