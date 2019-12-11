@@ -30,3 +30,5 @@ typedef struct {
     uint8_t erase_before_write;
     void *device;
 } nanofs_t;
+
+nano_fs_ret nanofs_do_stat(const uint8_t *filename, uint16_t filename_len, nano_fs_file_info_t *file_info);

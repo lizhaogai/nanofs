@@ -11,6 +11,14 @@
 
 nanofs_t nanofs = {0, 0, 0, 0, 0, 0, 0, NULL};
 
+int array_cmp(const uint8_t *arr1, const uint8_t *arr2, uint16_t size) {
+    for (uint16_t index = 0; index < size; index++) {
+        if (arr1[index] != arr2[index])
+            return 0;
+    }
+    return 1;
+}
+
 typedef enum nanofs_addr_type {
     NANOFS_PAGE_STATUS_ADDR = 0,
     NANOFS_FILENAME_OFFSET_ADDR = 5,
@@ -78,15 +86,15 @@ int nanofs_page_has_data(int status) {
            status == NANOFS_FILE_STATUS_UPDATING;
 }
 
-nano_fs_ret nano_fs_stat(const char *filename, nano_fs_file_info_t *file_info) {
-    nano_fs_ret ret = nanofs_do_stat(filename, file_info);
+nano_fs_ret nano_fs_stat(const uint8_t *filename, uint16_t filename_len, nano_fs_file_info_t *file_info) {
+    nano_fs_ret ret = nanofs_do_stat(filename, filename_len, file_info);
     if (ret == NANO_FS_NO_ERROR) {
 
     }
     return ret;
 }
 
-nano_fs_ret nanofs_do_stat(const char *filename, nano_fs_file_info_t *file_info) {
+nano_fs_ret nanofs_do_stat(const uint8_t *filename, uint16_t filename_len, nano_fs_file_info_t *file_info) {
     if (nanofs.status == 0) {
         return NANO_FS_NOT_READY;
     }
@@ -122,8 +130,9 @@ nano_fs_ret nanofs_do_stat(const char *filename, nano_fs_file_info_t *file_info)
             if (cn < fnl[0]) {
                 return NANO_FS_UNDEFINED_ERROR;
             }
-            int cmp_ret = strncmp(filename, name, cn);
-            if (!cmp_ret) {
+//            int cmp_ret = memcmp(filename, name, cn);
+//            int cmp_ret_r = memcmp(filename, name, filename_len);
+            if (filename_len == cn && (array_cmp(filename, name, filename_len))) {
 
                 uint8_t content_len[NANO_FS_CONTENT_LEN_SIZE];
                 cn = nano_fs_native_read_bytes(nanofs.device, nanofs.offset + nanofs.page_size * i +
@@ -145,7 +154,7 @@ nano_fs_ret nanofs_do_stat(const char *filename, nano_fs_file_info_t *file_info)
                 file_info->content_len = nanofs_len_func_hrev(content_len, NANO_FS_CONTENT_LEN_SIZE);
                 file_info->content_offset = nanofs_len_func_hrev(content_offset, NANO_FS_CONTENT_OFFSET_SIZE);
                 strcpy(file_info->filename, filename);
-                file_info->filename_len = strlen(filename);
+                file_info->filename_len = filename_len;
                 return NANO_FS_NO_ERROR;
             }
         } else {
@@ -155,12 +164,12 @@ nano_fs_ret nanofs_do_stat(const char *filename, nano_fs_file_info_t *file_info)
     return NANO_FS_NOT_FOUND;
 }
 
-int nano_fs_read(const char *filename, uint8_t *buf) {
+int nano_fs_read(const uint8_t *filename, uint16_t filename_len, uint8_t *buf) {
     if (nanofs.status == 0) {
         return NANO_FS_NOT_READY;
     }
     nano_fs_file_info_t nanofs_file_info;
-    nano_fs_ret ret = nanofs_do_stat(filename, &nanofs_file_info);
+    nano_fs_ret ret = nanofs_do_stat(filename, filename_len, &nanofs_file_info);
     if (ret) {
         return ret;
     }
@@ -173,7 +182,7 @@ int nano_fs_read_by_info(nano_fs_file_info_t *nanofs_file_info, uint8_t *buf) {
                                      buf);
 }
 
-int nanofs_do_write(uint8_t index, uint8_t *filename, uint8_t *buf, uint16_t len) {
+int nanofs_do_write(uint8_t index, const uint8_t *filename, uint16_t filename_l, uint8_t *buf, uint16_t len) {
     uint8_t data[NANO_FS_PAGE_STATUS_SIZE];
     nano_fs_native_erase(nanofs.device, nanofs.offset + nanofs.page_size * index, nanofs.page_size);
     data[0] = NANOFS_FILE_STATUS_WRITING;
@@ -196,7 +205,7 @@ int nanofs_do_write(uint8_t index, uint8_t *filename, uint8_t *buf, uint16_t len
                                NANO_FS_CONTENT_LEN_SIZE, content_len);
 
     uint8_t filename_len[NANO_FS_FILENAME_LEN_SIZE];
-    nanofs_len_func_hel(filename_len, NANO_FS_FILENAME_LEN_SIZE, strlen(filename));
+    nanofs_len_func_hel(filename_len, NANO_FS_FILENAME_LEN_SIZE, filename_l);
     nano_fs_native_write_bytes(nanofs.device,
                                nanofs.offset + nanofs.page_size * index +
                                nanofs_get_addr(NANOFS_FILENAME_OFFSET_ADDR),
@@ -205,7 +214,7 @@ int nanofs_do_write(uint8_t index, uint8_t *filename, uint8_t *buf, uint16_t len
     nano_fs_native_write_bytes(nanofs.device,
                                nanofs.offset + nanofs.page_size * index +
                                nanofs_get_addr(NANOFS_FILENAME_OFFSET_ADDR) + NANO_FS_FILENAME_LEN_SIZE,
-                               strlen(filename), filename);
+                               filename_l, filename);
 
     nano_fs_native_write_bytes(nanofs.device,
                                nanofs.offset + nanofs.page_size * index + NANO_FS_CONTENT_OFFSET,
@@ -218,15 +227,15 @@ int nanofs_do_write(uint8_t index, uint8_t *filename, uint8_t *buf, uint16_t len
     return len;
 }
 
-int nano_fs_write(const char *filename, uint8_t *buf, uint16_t len) {
+int nano_fs_write(const uint8_t *filename, uint16_t filename_len, uint8_t *buf, uint16_t len) {
     if (nanofs.status == 0) {
         return NANO_FS_NOT_READY;
     }
 
     nano_fs_file_info_t file_info;
-    int ret = nanofs_do_stat(filename, &file_info);
+    int ret = nanofs_do_stat(filename, filename_len, &file_info);
     if (ret == NANO_FS_NO_ERROR) {
-        return nanofs_do_write(file_info.page_index, filename, buf, len);
+        return nanofs_do_write(file_info.page_index, filename, filename_len, buf, len);
     } else if (ret == NANO_FS_NOT_FOUND) {
         int index;
         uint8_t data[NANO_FS_PAGE_STATUS_SIZE];
@@ -240,7 +249,7 @@ int nano_fs_write(const char *filename, uint8_t *buf, uint16_t len) {
             }
 
             if (!nanofs_page_has_data(data[0])) {
-                return nanofs_do_write(index, filename, buf, len);
+                return nanofs_do_write(index, filename, filename_len, buf, len);
             }
 
         }
@@ -250,12 +259,12 @@ int nano_fs_write(const char *filename, uint8_t *buf, uint16_t len) {
     }
 }
 
-int nano_fs_delete(const char *filename) {
+int nano_fs_delete(const uint8_t *filename, uint16_t filename_len) {
     if (nanofs.status == 0) {
         return NANO_FS_NOT_READY;
     }
     nano_fs_file_info_t file_info;
-    int ret = nanofs_do_stat(filename, &file_info);
+    int ret = nanofs_do_stat(filename, filename_len, &file_info);
 
     if (ret == NANO_FS_NO_ERROR) {
         return nano_fs_native_erase(nanofs.device, nanofs.offset + nanofs.page_size * file_info.page_index,

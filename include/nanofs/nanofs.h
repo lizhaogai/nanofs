@@ -89,15 +89,15 @@ typedef enum {
     NANO_FS_NOT_READY = -12,
 } nano_fs_ret;
 
-nano_fs_ret nano_fs_stat(const char *filename, nano_fs_file_info_t *file_info);
+nano_fs_ret nano_fs_stat(const uint8_t *filename, uint16_t filename_len, nano_fs_file_info_t *file_info);
 
-int nano_fs_read(const char *filename, uint8_t *buf);
+int nano_fs_read(const uint8_t *filename, uint16_t filename_len, uint8_t *buf);
 
 int nano_fs_read_by_info(nano_fs_file_info_t *nanofs_file_info, uint8_t *buf);
 
-int nano_fs_write(const char *filename, uint8_t *buf, uint16_t len);
+int nano_fs_write(const uint8_t *filename, uint16_t filename_len, uint8_t *buf, uint16_t len);
 
-int nano_fs_delete(const char *filename);
+int nano_fs_delete(const uint8_t *filename, uint16_t filename_len);
 
 nano_fs_ret nano_fs_init(void *device, int offset, uint16_t page_size, uint8_t page_count, uint8_t overwrite,
                          uint8_t erase_before_write);
