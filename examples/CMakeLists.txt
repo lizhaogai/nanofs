@@ -1,4 +1,4 @@
- add_executable(example example.c)
- add_executable(test test.c)
+ add_executable(example normal.c)
+ add_executable(test a.c)
 
- target_link_libraries(example PUBLIC nanofs)
+ target_link_libraries(example PUBLIC nanofs hunt)
