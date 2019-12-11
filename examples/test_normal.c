@@ -4,11 +4,7 @@
 #include <hunt_fixture.h>
 #include "header.h"
 
-int test_normal() {
-    fake_storage_init();
-    nano_fs_init(NULL, 122 * 4 * 1024, 4 * 1024, 6, 1);
-
-
+int pain() {
     uint16_t first_len = 300;
     uint8_t first_content[300];
     randomData(&first_content, first_len);
@@ -55,4 +51,24 @@ int test_normal() {
     ret = nano_fs_stat(filename, filename_len, &fileInfo);
     TEST_ASSERT_EQUAL(NANO_FS_NOT_FOUND, ret);
     printf("Normal test passed.");
+}
+
+TEST_GROUP(test_normal);
+
+TEST_SETUP(test_normal) {
+    fake_storage_init();
+    nano_fs_init(NULL, 122 * 4 * 1024, 4 * 1024, 6, 0);
+}
+
+TEST_TEAR_DOWN(test_normal) {
+    nano_fs_destroy();
+}
+
+TEST(test_normal, pain) {
+    pain();
+}
+
+
+TEST_GROUP_RUNNER(test_normal) {
+    RUN_TEST_CASE(test_normal, pain);
 }

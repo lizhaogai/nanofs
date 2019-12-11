@@ -5,10 +5,6 @@
 #include "header.h"
 
 int test_not_force_erase() {
-    fake_storage_init();
-    nano_fs_init(NULL, 122 * 4 * 1024, 4 * 1024, 6, 0);
-
-
     uint16_t first_len = 300;
     uint8_t first_content[300];
     randomData(&first_content, first_len);
@@ -47,4 +43,24 @@ int test_not_force_erase() {
     TEST_ASSERT_EQUAL_UINT8(NANO_FS_CONTENT_OFFSET, fileInfo.content_offset);
 
     printf("Test not force erase before write passed.");
+}
+
+TEST_GROUP(test_not_erase);
+
+TEST_SETUP(test_not_erase) {
+    fake_storage_init();
+    nano_fs_init(NULL, 122 * 4 * 1024, 4 * 1024, 6, 0);
+}
+
+TEST_TEAR_DOWN(test_not_erase) {
+    nano_fs_destroy();
+}
+
+TEST(test_not_erase, test_not_force_erase) {
+    test_not_force_erase();
+}
+
+
+TEST_GROUP_RUNNER(test_not_erase) {
+    RUN_TEST_CASE(test_not_erase, test_not_force_erase);
 }

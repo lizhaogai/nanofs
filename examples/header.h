@@ -20,4 +20,6 @@ int test_not_force_erase();
 
 int test_force_erase();
 
+int op_times();
+
 #endif

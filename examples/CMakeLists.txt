@@ -6,6 +6,7 @@ file(
         fake-storage.c
         test_nerase.c
         test_earse.c
+        test_op_times.c
 )
 
 target_include_directories(nanofs PUBLIC ./header.h)
