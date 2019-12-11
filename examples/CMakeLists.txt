@@ -1,4 +1,13 @@
- add_executable(example normal.c)
- add_executable(test a.c)
+file(
+        GLOB
+        fs_test_sources # This is an output parameter
+        test_normal.c
+        utils.c
+        fake-storage.c
+        test_nerase.c
+        test_earse.c
+)
 
- target_link_libraries(example PUBLIC nanofs hunt)
+target_include_directories(nanofs PUBLIC ./header.h)
+add_executable(example ${fs_test_sources} main.c)
+target_link_libraries(example PUBLIC nanofs hunt)

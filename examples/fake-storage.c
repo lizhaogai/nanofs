@@ -1,4 +1,5 @@
 #include <string.h>
+#include "header.h"
 
 uint8_t storage[512 * 1024];
 
