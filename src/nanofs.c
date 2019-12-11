@@ -100,26 +100,18 @@ int nano_fs_record_op(nano_fs_file_info_t *file_info, int type, size_t times) {
     uint8_t data[32];
     nano_fs_native_read_bytes(nano_fs.device, nano_fs.offset + nano_fs.page_size * file_info->page_index + start, size,
                               data);
-//    for (size_t t = 0; t < times; t++) {
-//        for (size_t s = 0; s < size; s++) {
-//            if (data[s]) {
-//                uint8_t rd[] = {data[s] >> 1};
-//                nano_fs_native_write_bytes(nano_fs.device,
-//                                           nano_fs.offset + nano_fs.page_size * file_info->page_index + start + s, 1,
-//                                           rd);
-//                return 0;
-//            }
-//        }
-//    }
     size_t af = 0;
-    for (size_t t = 0; t < times; t++) {
-        for (size_t s = 0; s < size; s++) {
-            if (data[s]) {
-                data[s] = data[s] >> 1;
-                af = t + 1;
+
+    for (size_t s = 0; s < size; s++) {
+        while (data[s]) {
+            data[s] = data[s] >> 1;
+            af = s + 1;
+            times--;
+            if (times == 0)
                 break;
-            }
         }
+        if (times == 0)
+            break;
     }
 
     if (af > 0) {
