@@ -1,0 +1,18 @@
+if (CONFIG_NANOFS)
+    zephyr_interface_library_named(nanofs)
+
+    target_include_directories(nanofs INTERFACE include src)
+
+    zephyr_library()
+
+    file(
+            GLOB
+            nanofs_sources # This is an output parameter
+            src/nanofs.c
+    )
+
+    zephyr_library_sources(
+            ${nanofs_sources}
+    )
+    zephyr_library_link_libraries(nanofs)
+endif ()

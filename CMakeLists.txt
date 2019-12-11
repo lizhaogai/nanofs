@@ -3,7 +3,12 @@ project(nanofs C)
 
 set(CMAKE_C_STANDARD 99)
 
-add_library(nanofs src/nanofs.h src/nanofs.c)
-
-add_executable(example examples/example.c)
-add_executable(test examples/test.c)
+if (ZEPHYR_BASE)
+    include(CMakeListsZephyr.txt)
+else ()
+    add_library(nanofs STATIC
+            src/nanofs.c
+            )
+    target_include_directories(nanofs PUBLIC include)
+    add_subdirectory(examples)
+endif ()

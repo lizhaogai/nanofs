@@ -1,0 +1,17 @@
+menuconfig NANOFS
+	bool "NANOFS support"
+	help
+	  Enables support for NANOFS.
+
+if NANOFS
+
+config APP_LINK_WITH_NANOFS
+	bool "Link 'app' with NANOFS"
+	default y
+	help
+	  Add NANOFS header files to the 'app' include path. It may be
+	  disabled if the include paths for NANOFS are causing aliasing
+	  issues for 'app'.
+
+endif # NANOFS
+
