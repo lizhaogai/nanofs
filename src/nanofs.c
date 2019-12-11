@@ -11,15 +11,7 @@
 
 nano_fs_t nano_fs = {0, 0, 0, 0, 0, 0, 0, NULL};
 
-int array_cmp(const uint8_t *arr1, const uint8_t *arr2, uint16_t size) {
-    for (uint16_t index = 0; index < size; index++) {
-        if (arr1[index] != arr2[index])
-            return 0;
-    }
-    return 1;
-}
-
-typedef enum nano_fs_addr_type {
+enum {
     NANO_FS_PAGE_STATUS_ADDR = 0,
     NANO_FS_FILENAME_LEN_ADDR = 1,
     NANO_FS_CONTENT_LEN_OFFSET_ADDR = 2,
@@ -110,22 +102,21 @@ _nano_fs_do_stat(const uint8_t *filename, uint16_t filename_len, nano_fs_file_in
             cn = nano_fs_native_read_bytes(nano_fs.device, nano_fs.offset + nano_fs.page_size * i +
                                                            nanofs_get_addr(NANO_FS_FILENAME_OFFSET_ADDR),
                                            NANO_FS_FILENAME_LEN_SIZE, fnl);
+            uint16_t _filename_len = nano_fs_len_func_hrev(fnl, NANO_FS_FILENAME_LEN_SIZE);
             if (cn < NANO_FS_FILENAME_LEN_SIZE) {
                 return NANO_FS_UNDEFINED_ERROR;
             }
-            if (fnl[0] == 0xFF >= 64 || fnl[0] == 0) {
+            if (_filename_len >= 64 || _filename_len == 0) {
                 continue;
             }
             cn = nano_fs_native_read_bytes(nano_fs.device, nano_fs.offset + nano_fs.page_size * i +
                                                            nanofs_get_addr(NANO_FS_FILENAME_OFFSET_ADDR) +
                                                            NANO_FS_FILENAME_LEN_SIZE,
-                                           fnl[0], name);
-            if (cn < fnl[0]) {
+                                           _filename_len, name);
+            if (cn < _filename_len) {
                 return NANO_FS_UNDEFINED_ERROR;
             }
-//            int cmp_ret = memcmp(filename, name, cn);
-//            int cmp_ret_r = memcmp(filename, name, filename_len);
-            if (filename_len == cn && (array_cmp(filename, name, filename_len))) {
+            if (filename_len == _filename_len && !(nano_fs_array_cmp(filename, name, filename_len))) {
 
                 uint8_t content_len[NANO_FS_CONTENT_LEN_SIZE];
                 cn = nano_fs_native_read_bytes(nano_fs.device, nano_fs.offset + nano_fs.page_size * i +
@@ -274,6 +265,14 @@ int nano_fs_delete(const uint8_t *filename, uint16_t filename_len) {
     } else {
         return ret;
     }
+}
+
+int nano_fs_array_cmp(const uint8_t *arr1, const uint8_t *arr2, uint16_t size) {
+    for (uint16_t index = 0; index < size; index++) {
+        if (arr1[index] != arr2[index])
+            return 1;
+    }
+    return 0;
 }
 
 nano_fs_ret nano_fs_init(void *device, int offset, uint16_t page_size, uint8_t page_count, uint8_t overwrite,
