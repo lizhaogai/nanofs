@@ -27,7 +27,7 @@ typedef struct {
     uint8_t page_count;
     uint8_t status; // 1 for ready,0 for not ready
 //    uint8_t overwrite;
-    uint8_t erase_before_write;
+    uint8_t force_erase_before_write;
     void *device;
 } nano_fs_t;
 

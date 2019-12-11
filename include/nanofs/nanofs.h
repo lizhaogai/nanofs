@@ -32,9 +32,10 @@
 #endif
 
 #ifdef  NANO_FS_OPTIMES_ENABLED
-#ifndef NANO_FS_OPTIMES_MAX
-#define  NANO_FS_OPTIMES_MAX 4 //4 bytes,Max 32 times
 #endif
+
+#ifndef NANO_FS_OPTIMES_MAX
+#define  NANO_FS_OPTIMES_MAX 8 //4 bytes,Max 32 times
 #endif
 
 #if  NANO_FS_OPTIMES_MAX
@@ -66,7 +67,10 @@ typedef struct {
     char creator[64];
     uint8_t creator_len;
     uint64_t created;
-    uint16_t optimes;
+    uint16_t op_times;
+    uint16_t stat_times;
+    uint16_t read_times;
+    uint16_t write_times;
 
     //TODO move to inner
     uint8_t page_index;
@@ -100,7 +104,7 @@ int nano_fs_write(const uint8_t *filename, uint16_t filename_len, uint8_t *buf, 
 int nano_fs_delete(const uint8_t *filename, uint16_t filename_len);
 
 nano_fs_ret nano_fs_init(void *device, int offset, uint16_t page_size, uint8_t page_count,
-                         uint8_t erase_before_write);
+                         uint8_t force_erase_before_write);
 
 int nano_fs_array_cmp(const uint8_t *arr1, const uint8_t *arr2, uint16_t size);
 
