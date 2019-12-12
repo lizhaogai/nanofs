@@ -108,6 +108,8 @@ nano_fs_ret nano_fs_init(void *device, int offset, uint16_t page_size, uint8_t p
 
 nano_fs_ret nano_fs_destroy();
 
+nano_fs_ret nano_fs_reformat();
+
 int nano_fs_array_cmp(const uint8_t *arr1, const uint8_t *arr2, uint16_t size);
 
 #ifdef __cplusplus

@@ -407,6 +407,15 @@ int nano_fs_array_cmp(const uint8_t *arr1, const uint8_t *arr2, uint16_t size) {
     return 0;
 }
 
+nano_fs_ret nano_fs_reformat() {
+    if (nano_fs.status == 0) {
+        return NANO_FS_NOT_READY;
+    }
+    for (int i = 0; i < nano_fs.page_count; i++) {
+        nano_fs_native_erase(nano_fs.device, nano_fs.offset + nano_fs.page_size * i, nano_fs.page_size);
+    }
+}
+
 nano_fs_ret nano_fs_destroy() {
     nano_fs.status = 0;
 }
