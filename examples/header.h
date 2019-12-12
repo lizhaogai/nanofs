@@ -22,4 +22,6 @@ int test_force_erase();
 
 int op_times();
 
+int op_reformat();
+
 #endif

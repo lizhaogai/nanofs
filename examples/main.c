@@ -10,6 +10,7 @@ void run_tests() {
     RUN_TEST_GROUP(test_erase);
     RUN_TEST_GROUP(test_not_erase);
     RUN_TEST_GROUP(test_op_times);
+    RUN_TEST_GROUP(test_reformat);
 }
 
 

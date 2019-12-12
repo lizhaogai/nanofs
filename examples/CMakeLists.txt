@@ -7,6 +7,7 @@ file(
         test_nerase.c
         test_earse.c
         test_op_times.c
+        test_reformat.c
 )
 
 target_include_directories(nanofs PUBLIC ./header.h)
