@@ -3,11 +3,10 @@ project(nanofs C)
 
 set(CMAKE_C_STANDARD 99)
 
-set(TARGET_NANO_FS_GROUP prod CACHE STRING "Group to build")
-
 if (ZEPHYR_BASE)
     include(CMakeListsZephyr.txt)
 else ()
+    set(TARGET_NANO_FS_GROUP test CACHE STRING "Group to build")
     add_library(nanofs STATIC
             src/nanofs.c
             )
